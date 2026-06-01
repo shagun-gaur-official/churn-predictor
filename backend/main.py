@@ -6,9 +6,9 @@ import pandas as pd
 import numpy as np
 
 # ── Load model and supporting files ──────────────────────────────────────────
-model           = joblib.load('model.pkl')
-scaler          = joblib.load('scaler.pkl')
-feature_columns = joblib.load('feature_columns.pkl')
+model=joblib.load("model.pkl")
+scaler=joblib.load("scaler.pkl")
+feature_columns=joblib.load("feature_columns.pkl")
 
 # ── Create the app ────────────────────────────────────────────────────────────
 app = FastAPI(title="Churn Predictor API")
