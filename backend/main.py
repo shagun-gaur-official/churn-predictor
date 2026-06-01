@@ -4,11 +4,20 @@ from pydantic import BaseModel
 import joblib
 import pandas as pd
 import numpy as np
-
+import os
 # ── Load model and supporting files ──────────────────────────────────────────
-model=joblib.load("model.pkl")
-scaler=joblib.load("scaler.pkl")
-feature_columns=joblib.load("feature_columns.pkl")
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model_path = os.path.join(BASE_DIR, "model.pkl")
+
+model = joblib.load(model_path)
+scaler_path = os.path.join(BASE_DIR, "scaler.pkl")
+
+scaler = joblib.load(scaler_path)
+feature_columns_path = os.path.join(BASE_DIR, "feature_columns.pkl")
+
+feature_columns = joblib.load(feature_columns_path)
 
 # ── Create the app ────────────────────────────────────────────────────────────
 app = FastAPI(title="Churn Predictor API")
