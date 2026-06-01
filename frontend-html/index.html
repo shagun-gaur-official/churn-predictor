@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Churn Predictor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="min-h-screen bg-gray-50 py-10 px-4">
+
+  <div class="max-w-2xl mx-auto">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-2xl font-semibold text-gray-800">Customer Churn Predictor</h1>
+      <p class="text-sm text-gray-500 mt-1">Enter customer details to predict churn risk</p>
+    </div>
+
+    <!-- Form card -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+
+      <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Numeric details</p>
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Tenure (months)</label>
+          <input id="tenure" type="number" value="12"
+            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Monthly charges</label>
+          <input id="MonthlyCharges" type="number" value="65.5"
+            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Total charges</label>
+          <input id="TotalCharges" type="number" value="786"
+            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+        </div>
+      </div>
+
+      <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Account info</p>
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Contract</label>
+          <select id="Contract" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option>Month-to-month</option>
+            <option>One year</option>
+            <option>Two year</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Internet service</label>
+          <select id="InternetService" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option>Fiber optic</option>
+            <option>DSL</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Payment method</label>
+          <select id="PaymentMethod" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option>Electronic check</option>
+            <option>Mailed check</option>
+            <option>Bank transfer (automatic)</option>
+            <option>Credit card (automatic)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Gender</label>
+          <select id="gender" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Services (1 = Yes, 0 = No)</p>
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <!-- binary dropdowns -->
+        <script>
+          const binaryFields = [
+            "SeniorCitizen","Partner","Dependents","PhoneService",
+            "MultipleLines","OnlineSecurity","OnlineBackup",
+            "DeviceProtection","TechSupport","StreamingTV",
+            "StreamingMovies","PaperlessBilling"
+          ];
+          document.write(binaryFields.map(f => `
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">${f}</label>
+              <select id="${f}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                <option value="0">0 — No</option>
+                <option value="1">1 — Yes</option>
+              </select>
+            </div>
+          `).join(''));
+        </script>
+      </div>
+
+      <button onclick="predict()"
+        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg text-sm transition">
+        Predict churn risk →
+      </button>
+    </div>
+
+    <!-- Error box -->
+    <div id="error-box" class="hidden bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3 mb-6"></div>
+
+    <!-- Result card -->
+    <div id="result-card" class="hidden bg-white border border-gray-200 rounded-xl p-6">
+      <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Prediction result</p>
+
+      <div class="flex items-center gap-3 mb-5">
+        <span id="risk-badge" class="px-4 py-1.5 rounded-lg text-sm font-medium border"></span>
+        <span class="text-sm text-gray-500">Prediction: <strong id="prediction-label" class="text-gray-700"></strong></span>
+      </div>
+
+      <div class="mb-2 flex justify-between text-xs text-gray-500">
+        <span>Churn probability</span>
+        <span id="prob-label"></span>
+      </div>
+      <div class="w-full bg-gray-100 rounded-full h-2.5 mb-6">
+        <div id="prob-bar" class="h-2.5 rounded-full transition-all duration-700" style="width:0%"></div>
+      </div>
+
+      <p class="text-xs text-gray-400">Model: XGBoost · API: FastAPI · Built for portfolio</p>
+    </div>
+
+  </div>
+
+  <script>
+    async function predict() {
+      const errorBox  = document.getElementById('error-box');
+      const resultCard = document.getElementById('result-card');
+      errorBox.classList.add('hidden');
+      resultCard.classList.add('hidden');
+
+      const data = {
+        tenure:           Number(document.getElementById('tenure').value),
+        MonthlyCharges:   Number(document.getElementById('MonthlyCharges').value),
+        TotalCharges:     Number(document.getElementById('TotalCharges').value),
+        Contract:         document.getElementById('Contract').value,
+        InternetService:  document.getElementById('InternetService').value,
+        PaymentMethod:    document.getElementById('PaymentMethod').value,
+        gender:           document.getElementById('gender').value,
+        SeniorCitizen:    Number(document.getElementById('SeniorCitizen').value),
+        Partner:          Number(document.getElementById('Partner').value),
+        Dependents:       Number(document.getElementById('Dependents').value),
+        PhoneService:     Number(document.getElementById('PhoneService').value),
+        MultipleLines:    Number(document.getElementById('MultipleLines').value),
+        OnlineSecurity:   Number(document.getElementById('OnlineSecurity').value),
+        OnlineBackup:     Number(document.getElementById('OnlineBackup').value),
+        DeviceProtection: Number(document.getElementById('DeviceProtection').value),
+        TechSupport:      Number(document.getElementById('TechSupport').value),
+        StreamingTV:      Number(document.getElementById('StreamingTV').value),
+        StreamingMovies:  Number(document.getElementById('StreamingMovies').value),
+        PaperlessBilling: Number(document.getElementById('PaperlessBilling').value),
+      };
+
+      try {
+        const res = await axios.post('http://127.0.0.1:8000/predict', data);
+        const r   = res.data;
+
+        const riskColors = {
+          High:   'bg-red-100 text-red-700 border-red-300',
+          Medium: 'bg-yellow-100 text-yellow-700 border-yellow-300',
+          Low:    'bg-green-100 text-green-700 border-green-300',
+        };
+        const barColors = {
+          High: 'bg-red-500',
+          Medium: 'bg-yellow-400',
+          Low: 'bg-green-500',
+        };
+
+        document.getElementById('risk-badge').className =
+          `px-4 py-1.5 rounded-lg text-sm font-medium border ${riskColors[r.risk_level]}`;
+        document.getElementById('risk-badge').textContent  = `${r.risk_level} churn risk`;
+        document.getElementById('prediction-label').textContent = r.prediction;
+        document.getElementById('prob-label').textContent = `${(r.probability * 100).toFixed(1)}%`;
+
+        const bar = document.getElementById('prob-bar');
+        bar.className = `h-2.5 rounded-full transition-all duration-700 ${barColors[r.risk_level]}`;
+        setTimeout(() => bar.style.width = `${(r.probability * 100).toFixed(1)}%`, 100);
+
+        resultCard.classList.remove('hidden');
+
+      } catch (err) {
+        errorBox.textContent = 'Could not reach the API. Make sure your backend is running on port 8000.';
+        errorBox.classList.remove('hidden');
+      }
+    }
+  </script>
+
+</body>
+</html>
