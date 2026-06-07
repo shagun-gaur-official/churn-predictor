@@ -3,8 +3,8 @@
 Predicts telecom customer churn using XGBoost with 81% accuracy and 0.86 ROC-AUC.
 
 ## Live Demo
-Frontend: https://shagun-gaur-official.github.io/churn-predictor/frontend-html/
-API Docs: https://churn-predictor-api.onrender.com/docs
+Frontend: https://shagun-gaur-official.github.io/churn-predictor/
+API Docs: https://churn-predictor-api-k8ed.onrender.com/docs
 
 ## Tech Stack
 - Python, Pandas, Scikit-learn, XGBoost
