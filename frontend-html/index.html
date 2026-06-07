@@ -158,7 +158,7 @@
       };
 
       try {
-        const res = await axios.post('http://127.0.0.1:8000/predict', data);
+        const res = await axios.post('https://churn-predictor-api-k8ed.onrender.com/predict', data);
         const r   = res.data;
 
         const riskColors = {
