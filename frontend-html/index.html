@@ -130,10 +130,14 @@
 
   <script>
     async function predict() {
-      const errorBox  = document.getElementById('error-box');
-      const resultCard = document.getElementById('result-card');
-      errorBox.classList.add('hidden');
-      resultCard.classList.add('hidden');
+  const btn = document.querySelector('button[onclick="predict()"]');
+  btn.textContent = 'Predicting... (first load may take ~30s)';
+  btn.disabled = true;
+  // rest of your existing code...
+  // at the end of try and catch blocks, reset button:
+  btn.textContent = 'Predict churn risk →';
+  btn.disabled = false;
+}
 
       const data = {
         tenure:           Number(document.getElementById('tenure').value),
