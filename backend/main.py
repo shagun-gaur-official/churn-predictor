@@ -13,7 +13,11 @@ app = FastAPI(title="Churn Predictor API")
 
 app.add_middleware(
     CORSMiddleware,
+<<<<<<< Updated upstream
     allow_origins=["https://shagun-gaur-official.github.io"], # Your GitHub Pages URL
+=======
+    allow_origins=["https://shagun-gaur-official.github.io"], # GitHub Pages URL
+>>>>>>> Stashed changes
     allow_credentials=True,
     allow_methods=["*"], # Allows all methods (GET, POST, etc.)
     allow_headers=["*"],
