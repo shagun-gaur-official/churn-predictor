@@ -13,9 +13,10 @@ app = FastAPI(title="Churn Predictor API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"]
+    allow_origins=["https://shagun-gaur-official.github.io"], # Your GitHub Pages URL
+    allow_credentials=True,
+    allow_methods=["*"], # Allows all methods (GET, POST, etc.)
+    allow_headers=["*"],
 )
 
 # Hardcoded scaling values from training data
